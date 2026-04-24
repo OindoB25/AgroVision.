@@ -314,13 +314,59 @@ if "chat" not in st.session_state:
 if "users_db" not in st.session_state:
     st.session_state.users_db = []
 
+# ─── LOGO SVG (from chosenlogo.html) ─────────────────────────────────────────
+LOGO_SVG = """
+<svg width="64" height="64" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="28,3 51,16 51,40 28,53 5,40 5,16" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+  <polygon points="28,10 46,20 46,36 28,46 10,36 10,20" stroke="#3a5e34" stroke-width="1" fill="none"/>
+  <path d="M28 13 C40 18 42 30 28 43 C14 30 16 18 28 13Z" fill="#7bc452"/>
+  <line x1="28" y1="13" x2="28" y2="43" stroke="#0d1a0a" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="28" y1="22" x2="35" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+  <line x1="28" y1="22" x2="21" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+  <line x1="28" y1="30" x2="36" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+  <line x1="28" y1="30" x2="20" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+  <line x1="10" y1="28" x2="46" y2="28" stroke="#5DCAA5" stroke-width="0.9" opacity="0.55"/>
+  <circle cx="38" cy="28" r="2.8" fill="#5DCAA5"/>
+  <circle cx="28" cy="3"  r="2" fill="#3a5e34"/>
+  <circle cx="51" cy="28" r="2" fill="#3a5e34"/>
+  <circle cx="28" cy="53" r="2" fill="#3a5e34"/>
+  <circle cx="5"  cy="28" r="2" fill="#3a5e34"/>
+</svg>
+"""
+
+LOGO_WORDMARK_HTML = f"""
+<div style="display:inline-flex;align-items:center;gap:16px;
+     padding:28px 40px;border:1px solid #1f3a1b;border-radius:16px;
+     background:#0d1a0a;position:relative;">
+  <!-- corner accents -->
+  <span style="position:absolute;top:-1px;left:-1px;width:14px;height:14px;
+        border-top:2px solid #7bc452;border-left:2px solid #7bc452;
+        border-radius:3px 0 0 0;opacity:.7;"></span>
+  <span style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;
+        border-bottom:2px solid #7bc452;border-right:2px solid #7bc452;
+        border-radius:0 0 3px 0;opacity:.7;"></span>
+  {LOGO_SVG}
+  <div>
+    <div style="line-height:1;">
+      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;
+            color:#e8f5e0;letter-spacing:-1.5px;">Agro</span><span
+            style="font-family:'Syne',sans-serif;font-weight:700;font-size:2.2rem;
+            color:#7bc452;letter-spacing:-1.5px;">Vision</span>
+    </div>
+    <div style="font-size:10px;letter-spacing:4px;color:#6a8f5a;
+          text-transform:uppercase;margin-top:6px;">Farm Smarter, Grow Further</div>
+  </div>
+</div>
+"""
+
 # ─── AUTH ─────────────────────────────────────────────────────────────────────
 def auth_screen():
-    st.markdown("""
-    <div style="text-align:center;margin-bottom:32px;">
-        <div style="font-size:40px;">🌿</div>
-        <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#e8f5e0;letter-spacing:-.03em;">AgroVision</div>
-        <div style="color:#6a8f5a;font-size:13px;margin-top:4px;">Crop Intelligence Platform · Kenya</div>
+    st.markdown(f"""
+    <div style="text-align:center;margin-bottom:36px;">
+      {LOGO_WORDMARK_HTML}
+      <div style="color:#6a8f5a;font-size:12px;margin-top:16px;letter-spacing:1px;">
+        Crop Intelligence Platform · Kenya
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -377,15 +423,38 @@ def auth_screen():
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown('<div style="text-align:center;color:#6a8f5a;font-size:12px;margin-top:20px;">Built for precision farming in Kenya 🌿 · KSh 67,800 prototype</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;color:#6a8f5a;font-size:12px;margin-top:20px;letter-spacing:0.5px;">"Farm Smarter, Grow Further." · Kenya 🌿 · KSh 67,800 prototype</div>', unsafe_allow_html=True)
 
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 def render_sidebar(sensors, user):
     with st.sidebar:
-        st.markdown(f"""
-        <div style="padding:8px 0 4px;">
-            <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#e8f5e0;">🌿 AgroVision</div>
-            <div style="font-size:11px;color:#6a8f5a;margin-top:2px;">Crop Intelligence Platform</div>
+        st.markdown("""
+        <div style="padding:12px 0 8px;display:flex;align-items:center;gap:12px;">
+          <div style="flex-shrink:0;">
+            <svg width="42" height="42" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="28,3 51,16 51,40 28,53 5,40 5,16" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+              <polygon points="28,10 46,20 46,36 28,46 10,36 10,20" stroke="#3a5e34" stroke-width="1" fill="none"/>
+              <path d="M28 13 C40 18 42 30 28 43 C14 30 16 18 28 13Z" fill="#7bc452"/>
+              <line x1="28" y1="13" x2="28" y2="43" stroke="#0d1a0a" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="28" y1="22" x2="35" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+              <line x1="28" y1="22" x2="21" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+              <line x1="28" y1="30" x2="36" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+              <line x1="28" y1="30" x2="20" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
+              <line x1="10" y1="28" x2="46" y2="28" stroke="#5DCAA5" stroke-width="0.9" opacity="0.55"/>
+              <circle cx="38" cy="28" r="2.8" fill="#5DCAA5"/>
+              <circle cx="28" cy="3"  r="2" fill="#3a5e34"/>
+              <circle cx="51" cy="28" r="2" fill="#3a5e34"/>
+              <circle cx="28" cy="53" r="2" fill="#3a5e34"/>
+              <circle cx="5"  cy="28" r="2" fill="#3a5e34"/>
+            </svg>
+          </div>
+          <div>
+            <div style="line-height:1.1;">
+              <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:#e8f5e0;letter-spacing:-0.5px;">Agro</span><span
+                    style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.25rem;color:#7bc452;letter-spacing:-0.5px;">Vision</span>
+            </div>
+            <div style="font-size:9px;letter-spacing:2.5px;color:#6a8f5a;text-transform:uppercase;margin-top:3px;">Farm Smarter, Grow Further</div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;font-size:12px;color:#7bc452;margin:12px 0 8px;">
             <span style="display:inline-block;width:7px;height:7px;background:#7bc452;border-radius:50%;margin-right:6px;"></span>
