@@ -314,89 +314,325 @@ if "chat" not in st.session_state:
 if "users_db" not in st.session_state:
     st.session_state.users_db = []
 
-# ─── LOGO SVG (from chosenlogo.html) ─────────────────────────────────────────
-LOGO_SVG = """
-<svg width="64" height="64" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <polygon points="28,3 51,16 51,40 28,53 5,40 5,16" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
-  <polygon points="28,10 46,20 46,36 28,46 10,36 10,20" stroke="#3a5e34" stroke-width="1" fill="none"/>
-  <path d="M28 13 C40 18 42 30 28 43 C14 30 16 18 28 13Z" fill="#7bc452"/>
-  <line x1="28" y1="13" x2="28" y2="43" stroke="#0d1a0a" stroke-width="1.4" stroke-linecap="round"/>
-  <line x1="28" y1="22" x2="35" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-  <line x1="28" y1="22" x2="21" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-  <line x1="28" y1="30" x2="36" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-  <line x1="28" y1="30" x2="20" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-  <line x1="10" y1="28" x2="46" y2="28" stroke="#5DCAA5" stroke-width="0.9" opacity="0.55"/>
-  <circle cx="38" cy="28" r="2.8" fill="#5DCAA5"/>
-  <circle cx="28" cy="3"  r="2" fill="#3a5e34"/>
-  <circle cx="51" cy="28" r="2" fill="#3a5e34"/>
-  <circle cx="28" cy="53" r="2" fill="#3a5e34"/>
-  <circle cx="5"  cy="28" r="2" fill="#3a5e34"/>
-</svg>
-"""
-
-LOGO_WORDMARK_HTML = f"""
-<div style="display:inline-flex;align-items:center;gap:16px;
-     padding:28px 40px;border:1px solid #1f3a1b;border-radius:16px;
-     background:#0d1a0a;position:relative;">
-  <!-- corner accents -->
-  <span style="position:absolute;top:-1px;left:-1px;width:14px;height:14px;
-        border-top:2px solid #7bc452;border-left:2px solid #7bc452;
-        border-radius:3px 0 0 0;opacity:.7;"></span>
-  <span style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;
-        border-bottom:2px solid #7bc452;border-right:2px solid #7bc452;
-        border-radius:0 0 3px 0;opacity:.7;"></span>
-  {LOGO_SVG}
-  <div>
-    <div style="line-height:1;">
-      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;
-            color:#e8f5e0;letter-spacing:-1.5px;">Agro</span><span
-            style="font-family:'Syne',sans-serif;font-weight:700;font-size:2.2rem;
-            color:#7bc452;letter-spacing:-1.5px;">Vision</span>
-    </div>
-    <div style="font-size:10px;letter-spacing:4px;color:#6a8f5a;
-          text-transform:uppercase;margin-top:6px;">Farm Smarter, Grow Further</div>
-  </div>
-</div>
-"""
-
 # ─── AUTH ─────────────────────────────────────────────────────────────────────
+# Inline SVG logo string (no f-string needed — static)
+_LOGO_SVG_INLINE = (
+    '<svg width="64" height="64" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<polygon points="28,3 51,16 51,40 28,53 5,40 5,16" stroke="#2d4a28" stroke-width="1.5" fill="none"/>'
+    '<polygon points="28,10 46,20 46,36 28,46 10,36 10,20" stroke="#3a5e34" stroke-width="1" fill="none"/>'
+    '<path d="M28 13 C40 18 42 30 28 43 C14 30 16 18 28 13Z" fill="#7bc452"/>'
+    '<line x1="28" y1="13" x2="28" y2="43" stroke="#0d1a0a" stroke-width="1.4" stroke-linecap="round"/>'
+    '<line x1="28" y1="22" x2="35" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="28" y1="22" x2="21" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="28" y1="30" x2="36" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="28" y1="30" x2="20" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="10" y1="28" x2="46" y2="28" stroke="#5DCAA5" stroke-width="0.9" opacity="0.55"/>'
+    '<circle cx="38" cy="28" r="2.8" fill="#5DCAA5"/>'
+    '<circle cx="28" cy="3" r="2" fill="#3a5e34"/>'
+    '<circle cx="51" cy="28" r="2" fill="#3a5e34"/>'
+    '<circle cx="28" cy="53" r="2" fill="#3a5e34"/>'
+    '<circle cx="5" cy="28" r="2" fill="#3a5e34"/>'
+    '</svg>'
+)
+
+_LOGO_SMALL_SVG = (
+    '<svg width="38" height="38" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<polygon points="28,3 51,16 51,40 28,53 5,40 5,16" stroke="#2d4a28" stroke-width="1.5" fill="none"/>'
+    '<polygon points="28,10 46,20 46,36 28,46 10,36 10,20" stroke="#3a5e34" stroke-width="1" fill="none"/>'
+    '<path d="M28 13 C40 18 42 30 28 43 C14 30 16 18 28 13Z" fill="#7bc452"/>'
+    '<line x1="28" y1="13" x2="28" y2="43" stroke="#0d1a0a" stroke-width="1.4" stroke-linecap="round"/>'
+    '<line x1="28" y1="22" x2="35" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="28" y1="22" x2="21" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="28" y1="30" x2="36" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="28" y1="30" x2="20" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>'
+    '<line x1="10" y1="28" x2="46" y2="28" stroke="#5DCAA5" stroke-width="0.9" opacity="0.55"/>'
+    '<circle cx="38" cy="28" r="2.8" fill="#5DCAA5"/>'
+    '<circle cx="28" cy="3" r="2" fill="#3a5e34"/>'
+    '<circle cx="51" cy="28" r="2" fill="#3a5e34"/>'
+    '<circle cx="28" cy="53" r="2" fill="#3a5e34"/>'
+    '<circle cx="5" cy="28" r="2" fill="#3a5e34"/>'
+    '</svg>'
+)
+
 def auth_screen():
-    st.markdown(f"""
-    <div style="text-align:center;margin-bottom:36px;">
-      {LOGO_WORDMARK_HTML}
-      <div style="color:#6a8f5a;font-size:12px;margin-top:16px;letter-spacing:1px;">
-        Crop Intelligence Platform · Kenya
-      </div>
-    </div>
+    # Extra CSS just for the auth page — polished tab pills, no Streamlit radio
+    st.markdown("""
+    <style>
+    /* ── Auth page overrides ── */
+    .auth-page-wrap {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px 60px;
+    }
+    /* Subtle grid overlay */
+    .auth-page-wrap::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(45,74,40,.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(45,74,40,.12) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+    }
+    /* Radial glow */
+    .auth-page-wrap::after {
+        content: '';
+        position: fixed;
+        width: 600px; height: 400px;
+        top: -100px; left: 50%;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse, rgba(123,196,82,.07) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .auth-inner { position: relative; z-index: 1; width: 100%; max-width: 440px; }
+
+    /* Logo lockup — no border/frame */
+    .auth-logo-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        margin-bottom: 10px;
+    }
+    .auth-wordmark-agro {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 2.6rem;
+        color: #e8f5e0;
+        letter-spacing: -2px;
+        line-height: 1;
+    }
+    .auth-wordmark-vision {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 2.6rem;
+        color: #7bc452;
+        letter-spacing: -2px;
+        line-height: 1;
+    }
+    .auth-tagline {
+        font-size: 10px;
+        letter-spacing: 4px;
+        color: #8ab870;
+        text-transform: uppercase;
+        margin-top: 5px;
+    }
+    /* Divider line below logo */
+    .auth-divider {
+        width: 48px; height: 1px;
+        background: linear-gradient(90deg, transparent, #2d4a28, transparent);
+        margin: 18px auto 28px;
+    }
+
+    /* Tab toggle pills */
+    .auth-tabs {
+        display: flex;
+        gap: 0;
+        background: #0d150a;
+        border: 1px solid #1f3a1b;
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 24px;
+    }
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px 0;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #4a6a3a;
+        border-radius: 9px;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        transition: all .2s;
+        letter-spacing: .02em;
+    }
+    .auth-tab.active {
+        background: #1a2e14;
+        color: #7bc452;
+        box-shadow: 0 1px 6px rgba(0,0,0,.35);
+    }
+    .auth-tab:hover:not(.active) { color: #a8c898; }
+
+    /* Card */
+    .auth-card {
+        background: #0d150a;
+        border: 1px solid #1f3a1b;
+        border-radius: 16px;
+        padding: 32px 36px 28px;
+    }
+
+    /* Demo hint */
+    .auth-hint {
+        background: transparent;
+        border: 1px solid #1a2c16;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-top: 14px;
+        font-size: 12px;
+        color: #4a6a3a;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    /* Footer */
+    .auth-footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 11px;
+        color: #6a8f5a;
+        letter-spacing: 1px;
+    }
+    </style>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        mode = st.radio("", ["Sign In", "Create Account"], horizontal=True, label_visibility="collapsed")
+    # ── Mode toggle stored in session state ──
+    if "auth_mode" not in st.session_state:
+        st.session_state.auth_mode = "signin"
 
-        if mode == "Create Account":
-            name = st.text_input("Full Name", placeholder="e.g. John Mwangi")
-            farm = st.text_input("Farm Name", placeholder="e.g. Mwangi Family Farm")
-            phone = st.text_input("Phone Number", placeholder="e.g. +254 712 345 678")
-        email = st.text_input("Email Address", placeholder="you@example.com")
-        password = st.text_input("Password", type="password", placeholder="Min. 6 characters")
-        if mode == "Create Account":
+    # ── Logo header ──
+    st.markdown(
+        '<div class="auth-page-wrap"><div class="auth-inner">'
+        '<div class="auth-logo-wrap">'
+        + _LOGO_SVG_INLINE +
+        '<div>'
+        '<div><span class="auth-wordmark-agro">Agro</span>'
+        '<span class="auth-wordmark-vision">Vision</span></div>'
+        '<div class="auth-tagline">Farm Smarter, Grow Further</div>'
+        '</div></div>'
+        '<div class="auth-divider"></div>'
+        '</div></div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Tab toggle buttons ──
+    signin_bg  = "#1a2e14" if st.session_state.auth_mode == "signin"   else "#0d150a"
+    signin_col = "#7bc452" if st.session_state.auth_mode == "signin"   else "#6a8f5a"
+    signup_bg  = "#1a2e14" if st.session_state.auth_mode == "register" else "#0d150a"
+    signup_col = "#7bc452" if st.session_state.auth_mode == "register" else "#6a8f5a"
+
+    st.markdown(f"""
+    <style>
+    /* Sign In pill */
+    div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) .stButton > button {{
+        background: {signin_bg} !important;
+        color: {signin_col} !important;
+        border: 1px solid #1f3a1b !important;
+        border-right: none !important;
+        border-radius: 10px 0 0 10px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        padding: 10px 0 !important;
+        letter-spacing: 0.02em !important;
+        transition: all .2s !important;
+    }}
+    div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(1) .stButton > button:hover {{
+        color: #a8d87a !important;
+        background: #1f3a1b !important;
+    }}
+    /* Create Account pill */
+    div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) .stButton > button {{
+        background: {signup_bg} !important;
+        color: {signup_col} !important;
+        border: 1px solid #1f3a1b !important;
+        border-left: none !important;
+        border-radius: 0 10px 10px 0 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        padding: 10px 0 !important;
+        letter-spacing: 0.02em !important;
+        transition: all .2s !important;
+    }}
+    div[data-testid="column"]:nth-of-type(2) div[data-testid="column"]:nth-of-type(2) .stButton > button:hover {{
+        color: #a8d87a !important;
+        background: #1f3a1b !important;
+    }}
+    /* Submit button */
+    div[data-testid="column"]:nth-of-type(2) div[data-testid="stVerticalBlock"] > div:last-child .stButton > button,
+    button[kind="primary"] {{
+        background: #7bc452 !important;
+        color: #0a1508 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        padding: 12px 0 !important;
+    }}
+    /* Input labels — light green so they're readable */
+    .stTextInput label, .stTextInput label p {{
+        color: #c8e6b0 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        margin-bottom: 2px !important;
+    }}
+    /* Placeholder text — lighter so it's visible */
+    .stTextInput input::placeholder {{
+        color: #6a9a54 !important;
+        opacity: 1 !important;
+    }}
+    /* Typed text inside inputs */
+    .stTextInput input {{
+        color: #dff0d0 !important;
+    }}
+    /* Crush the giant gaps Streamlit adds between each input */
+    .stTextInput {{
+        margin-bottom: -14px !important;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    _, mid, _ = st.columns([1, 2, 1])
+    with mid:
+        t1, t2 = st.columns(2)
+        with t1:
+            if st.button("Sign In", use_container_width=True, key="tab_signin"):
+                st.session_state.auth_mode = "signin"
+                st.rerun()
+        with t2:
+            if st.button("Create Account", use_container_width=True, key="tab_register"):
+                st.session_state.auth_mode = "register"
+                st.rerun()
+
+    mode = st.session_state.auth_mode
+
+    # ── Form ──
+    _, mid2, _ = st.columns([1, 2, 1])
+    with mid2:
+        # Wrap in a subtle card
+        st.markdown('<div style="background:#0d150a;border:1px solid #1f3a1b;border-radius:16px;padding:16px 32px 18px;margin-top:6px;">', unsafe_allow_html=True)
+
+        if mode == "register":
+            name  = st.text_input("Full Name",        placeholder="e.g. John Mwangi")
+            farm  = st.text_input("Farm Name",        placeholder="e.g. Mwangi Family Farm")
+            phone = st.text_input("Phone Number",     placeholder="e.g. +254 712 345 678")
+        email    = st.text_input("Email Address",     placeholder="you@example.com")
+        password = st.text_input("Password",          type="password", placeholder="Min. 6 characters")
+        if mode == "register":
             confirm = st.text_input("Confirm Password", type="password", placeholder="Repeat your password")
 
-        if st.button("Sign In →" if mode == "Sign In" else "Create Account →", use_container_width=True):
+        btn_label = "Sign In →" if mode == "signin" else "Create Account →"
+        if st.button(btn_label, use_container_width=True, key="auth_submit"):
             errors = []
-            if mode == "Create Account":
-                if not name.strip(): errors.append("Full name is required")
-                if not farm.strip(): errors.append("Farm name is required")
+            if mode == "register":
+                if not name.strip():  errors.append("Full name is required")
+                if not farm.strip():  errors.append("Farm name is required")
                 if not phone.strip(): errors.append("Phone number is required")
                 if password != confirm: errors.append("Passwords do not match")
-            if "@" not in email: errors.append("Valid email required")
-            if len(password) < 6: errors.append("Password must be at least 6 characters")
+            if "@" not in email:     errors.append("Valid email required")
+            if len(password) < 6:   errors.append("Password must be at least 6 characters")
 
             if errors:
                 for e in errors:
                     st.error(e)
-            elif mode == "Create Account":
+            elif mode == "register":
                 if any(u["email"] == email for u in st.session_state.users_db):
                     st.error("Email already registered")
                 else:
@@ -411,51 +647,47 @@ def auth_screen():
                 if not match:
                     st.error("Invalid email or password")
                 else:
-                    safe = {k: v for k, v in match.items() if k != "password"}
-                    st.session_state.user = safe
+                    st.session_state.user = {k: v for k, v in match.items() if k != "password"}
                     st.rerun()
 
-        if mode == "Sign In":
+        if mode == "signin":
             st.markdown("""
-            <div style="background:#0a1508;border:1px solid #243d1f;border-radius:10px;padding:14px 16px;margin-top:8px;">
-                <div style="font-size:12px;color:#6a8f5a;margin-bottom:4px;">🔑 Demo Account</div>
-                <div style="font-size:13px;color:#a8c898;">Register a new account above, then sign in with those credentials.</div>
+            <div style="margin-top:16px;padding:11px 14px;border:1px solid #2d4a28;
+                 border-radius:10px;display:flex;align-items:flex-start;gap:8px;background:rgba(45,74,40,.08);">
+              <span style="font-size:14px;flex-shrink:0;">🔑</span>
+              <div style="font-size:12px;color:#a8c898;line-height:1.6;">
+                Register a new account first, then sign in with those credentials.
+              </div>
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown('<div style="text-align:center;color:#6a8f5a;font-size:12px;margin-top:20px;letter-spacing:0.5px;">"Farm Smarter, Grow Further." · Kenya 🌿 · KSh 67,800 prototype</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown(
+            '<div style="text-align:center;margin-top:20px;font-size:11px;'
+            'color:#6a8f5a;letter-spacing:1px;">'
+            '"Farm Smarter, Grow Further." &middot; Kenya &middot; KSh 67,800 prototype'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 def render_sidebar(sensors, user):
     with st.sidebar:
+        st.markdown(
+            '<div style="padding:12px 0 8px;display:flex;align-items:center;gap:12px;">'
+            + _LOGO_SMALL_SVG +
+            '<div>'
+            '<div style="line-height:1.1;">'
+            '<span style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:1.25rem;color:#e8f5e0;letter-spacing:-0.5px;">Agro</span>'
+            '<span style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:1.25rem;color:#7bc452;letter-spacing:-0.5px;">Vision</span>'
+            '</div>'
+            '<div style="font-size:9px;letter-spacing:2.5px;color:#6a8f5a;text-transform:uppercase;margin-top:3px;">Farm Smarter, Grow Further</div>'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         st.markdown("""
-        <div style="padding:12px 0 8px;display:flex;align-items:center;gap:12px;">
-          <div style="flex-shrink:0;">
-            <svg width="42" height="42" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="28,3 51,16 51,40 28,53 5,40 5,16" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
-              <polygon points="28,10 46,20 46,36 28,46 10,36 10,20" stroke="#3a5e34" stroke-width="1" fill="none"/>
-              <path d="M28 13 C40 18 42 30 28 43 C14 30 16 18 28 13Z" fill="#7bc452"/>
-              <line x1="28" y1="13" x2="28" y2="43" stroke="#0d1a0a" stroke-width="1.4" stroke-linecap="round"/>
-              <line x1="28" y1="22" x2="35" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-              <line x1="28" y1="22" x2="21" y2="27" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-              <line x1="28" y1="30" x2="36" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-              <line x1="28" y1="30" x2="20" y2="34" stroke="#0d1a0a" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>
-              <line x1="10" y1="28" x2="46" y2="28" stroke="#5DCAA5" stroke-width="0.9" opacity="0.55"/>
-              <circle cx="38" cy="28" r="2.8" fill="#5DCAA5"/>
-              <circle cx="28" cy="3"  r="2" fill="#3a5e34"/>
-              <circle cx="51" cy="28" r="2" fill="#3a5e34"/>
-              <circle cx="28" cy="53" r="2" fill="#3a5e34"/>
-              <circle cx="5"  cy="28" r="2" fill="#3a5e34"/>
-            </svg>
-          </div>
-          <div>
-            <div style="line-height:1.1;">
-              <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:#e8f5e0;letter-spacing:-0.5px;">Agro</span><span
-                    style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.25rem;color:#7bc452;letter-spacing:-0.5px;">Vision</span>
-            </div>
-            <div style="font-size:9px;letter-spacing:2.5px;color:#6a8f5a;text-transform:uppercase;margin-top:3px;">Farm Smarter, Grow Further</div>
-          </div>
-        </div>
         <div style="display:flex;align-items:center;font-size:12px;color:#7bc452;margin:12px 0 8px;">
             <span style="display:inline-block;width:7px;height:7px;background:#7bc452;border-radius:50%;margin-right:6px;"></span>
             LIVE SENSORS
@@ -486,9 +718,10 @@ def render_sidebar(sensors, user):
         obs = sensors["obstacleDist"]
         obs_color = C["amber"] if obs < 50 else C["teal"]
         obs_text = f"⚠️ Obstacle at {obs}cm" if obs < 50 else f"✅ Clear — {obs:.0f}cm ahead"
+        gps_icon = "\U0001f6f0\ufe0f"
         st.markdown(f"""
         <div style="background:#111e0e;border:1px solid #243d1f;border-radius:8px;padding:8px 10px;font-size:12px;color:#a8c898;margin-bottom:4px;">
-            🛰️ <span style="color:#6a8f5a;">GPS:</span> {sensors['gpsLat']}, {sensors['gpsLon']}
+            {gps_icon} <span style="color:#6a8f5a;">GPS:</span> {sensors['gpsLat']}, {sensors['gpsLon']}
         </div>
         <div style="background:#111e0e;border:1px solid #243d1f;border-radius:8px;padding:8px 10px;font-size:12px;color:{obs_color};margin-bottom:12px;">
             {obs_text}
@@ -516,10 +749,12 @@ def render_sidebar(sensors, user):
 def tab_overview(sensors, user):
     first_name = user["name"].split()[0]
     today = datetime.date.today().strftime("%A, %d %B")
+    greeting = f"Good morning, {first_name} \U0001f44b"
+    status_line = f"Farm status for {today}"
     st.markdown(f"""
     <div style="margin-bottom:24px;">
-        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#e8f5e0;">Good morning, {first_name} 👋</div>
-        <div style="color:#6a8f5a;margin-top:4px;font-size:14px;">Here's your farm status for {today}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#e8f5e0;">{greeting}</div>
+        <div style="color:#6a8f5a;margin-top:4px;font-size:14px;">{status_line}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -567,7 +802,7 @@ def tab_overview(sensors, user):
                 <div style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:{color};">{info['health']}</div>
                 <div style="font-size:11px;color:#6a8f5a;margin-bottom:8px;">Health Score</div>
                 {progress_bar_html(info['health'], color, 4)}
-                <div style="font-size:12px;color:#a8c898;margin-top:8px;">Field {info['field']} · {info['area']}ha · {info['daysLeft']}d to harvest</div>
+                <div style="font-size:12px;color:#a8c898;margin-top:8px;">Field {info['field']} &middot; {info['area']}ha &middot; {info['daysLeft']}d to harvest</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -581,7 +816,7 @@ def tab_overview(sensors, user):
         <div class="card card-{card_cls}" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div>
                 <div style="font-weight:500;margin-bottom:2px;">{name}</div>
-                <div style="font-size:12px;color:#6a8f5a;">{', '.join(p['affected'])} · {p['confidence']}% confidence</div>
+                <div style="font-size:12px;color:#6a8f5a;">{', '.join(p['affected'])} &middot; {p['confidence']}% confidence</div>
             </div>
             {badge(sev, bdg_v)}
         </div>
@@ -601,7 +836,7 @@ def tab_crop_health(sensors):
             <div class="card card-{info['status']}">
                 {badge(badge_label, badge_v)}
                 <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;display:block;margin-top:12px;">{name}</div>
-                <div style="font-size:11px;color:#6a8f5a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Field {info['field']} · {info['area']}ha</div>
+                <div style="font-size:11px;color:#6a8f5a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Field {info['field']} &middot; {info['area']}ha</div>
                 <div style="font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:{color};">{info['health']}</div>
                 <div style="font-size:11px;color:#6a8f5a;margin-bottom:8px;">Health Score</div>
                 {progress_bar_html(info['health'], color, 5)}
@@ -689,7 +924,7 @@ def tab_pest_disease():
         sev = pest["severity"]
         card_cls = "alert" if sev == "HIGH" else "warn" if sev == "MEDIUM" else "good"
         bdg_v = "red" if sev == "HIGH" else "amber" if sev == "MEDIUM" else "green"
-        with st.expander(f"{name} — {', '.join(pest['affected'])} · {pest['confidence']}% confidence"):
+        with st.expander(f"{name} — {', '.join(pest['affected'])} &middot; {pest['confidence']}% confidence"):
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown(f"""
@@ -704,7 +939,7 @@ def tab_pest_disease():
                     st.markdown(f"""
                     <div style="background:#0a1508;border:1px solid #243d1f;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
                         <div style="font-weight:500;font-size:14px;margin-bottom:4px;">{p['name']}</div>
-                        <div style="font-size:12px;color:#a8c898;">📏 {p['dose']} · 📅 {p['freq']}</div>
+                        <div style="font-size:12px;color:#a8c898;">📏 {p['dose']} &middot; 📅 {p['freq']}</div>
                         <div style="font-size:12px;color:#7bc452;margin-top:2px;">💰 ~KSh {p['cost']:,}/application</div>
                     </div>
                     """, unsafe_allow_html=True)
@@ -769,7 +1004,7 @@ def tab_yield(sensors):
             </div>
             <div style="flex:1;">
                 <div style="font-weight:500;margin-bottom:2px;">{r['name']}</div>
-                <div style="font-size:12px;color:#6a8f5a;">Impact: {r['impact']} · 💡 {r['mit']}</div>
+                <div style="font-size:12px;color:#6a8f5a;">Impact: {r['impact']} &middot; 💡 {r['mit']}</div>
             </div>
             <div style="width:100px;">
                 {progress_bar_html(r['prob'], col_c, 6)}
@@ -779,7 +1014,7 @@ def tab_yield(sensors):
 
 def tab_recommendations(sensors):
     st.markdown('<div style="font-family:\'Syne\',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:4px;">💡 Smart Recommendations</div>', unsafe_allow_html=True)
-    st.markdown('<div style="color:#6a8f5a;font-size:13px;margin-bottom:20px;">Generated from sensor data · Soil Moisture, pH, DHT11, GPS, Camera</div>', unsafe_allow_html=True)
+    st.markdown('<div style="color:#6a8f5a;font-size:13px;margin-bottom:20px;">Generated from sensor data &middot; Soil Moisture, pH, DHT11, GPS, Camera</div>', unsafe_allow_html=True)
 
     for rec in generate_recs(sensors):
         priority = rec["priority"]
@@ -802,7 +1037,7 @@ def tab_recommendations(sensors):
     st.markdown('<div style="font-family:\'Syne\',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:14px;">📅 Spray Schedule</div>', unsafe_allow_html=True)
 
     header_cols = st.columns([1.2, 2.5, 1.2, 1, 1])
-    headers = ["Crop", "Pesticide · Dose", "Next Due", "Cost", "Status"]
+    headers = ["Crop", "Pesticide &middot; Dose", "Next Due", "Cost", "Status"]
     for col, h in zip(header_cols, headers):
         col.markdown(f'<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6a8f5a;padding:10px 0;">{h}</div>', unsafe_allow_html=True)
 
@@ -810,7 +1045,7 @@ def tab_recommendations(sensors):
         bdg_v = "red" if row["status"] == "OVERDUE" else "amber" if row["status"] == "UPCOMING" else "green"
         r_cols = st.columns([1.2, 2.5, 1.2, 1, 1])
         r_cols[0].markdown(f'<div style="padding:10px 0;font-size:14px;border-top:1px solid #243d1f;">{row["crop"]}</div>', unsafe_allow_html=True)
-        r_cols[1].markdown(f'<div style="padding:10px 0;font-size:13px;color:#a8c898;border-top:1px solid #243d1f;">{row["pesticide"]} · {row["dose"]}</div>', unsafe_allow_html=True)
+        r_cols[1].markdown(f'<div style="padding:10px 0;font-size:13px;color:#a8c898;border-top:1px solid #243d1f;">{row["pesticide"]} &middot; {row["dose"]}</div>', unsafe_allow_html=True)
         r_cols[2].markdown(f'<div style="padding:10px 0;font-size:13px;border-top:1px solid #243d1f;">{format_date(row["daysUntil"])}</div>', unsafe_allow_html=True)
         r_cols[3].markdown(f'<div style="padding:10px 0;font-size:13px;color:#7bc452;border-top:1px solid #243d1f;">KSh {row["cost"]}</div>', unsafe_allow_html=True)
         r_cols[4].markdown(f'<div style="padding:10px 0;border-top:1px solid #243d1f;">{badge(row["status"], bdg_v)}</div>', unsafe_allow_html=True)
@@ -832,8 +1067,8 @@ def tab_ai_advisor(sensors):
         st.session_state.chat = [{
             "role": "assistant",
             "content": (f"👋 Hello! I'm your **AgroVision AI Advisor**. I have live data from all your sensors.\n\n"
-                        f"Current: 🌡️ {sensors['temperature']}°C · 💧 {sensors['humidity']}% humidity · "
-                        f"🌱 Soil moisture {sensors['soilMoisture']}% · 🧪 pH {sensors['soilPh']}\n\n"
+                        f"Current: 🌡️ {sensors['temperature']}°C &middot; 💧 {sensors['humidity']}% humidity &middot; "
+                        f"🌱 Soil moisture {sensors['soilMoisture']}% &middot; 🧪 pH {sensors['soilPh']}\n\n"
                         f"How can I help you today?")
         }]
 
@@ -866,68 +1101,6 @@ def tab_ai_advisor(sensors):
         st.session_state.chat = []
         st.rerun()
 
-def tab_hardware(sensors):
-    st.markdown('<div style="font-family:\'Syne\',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:4px;">🔌 Hardware System Monitor</div>', unsafe_allow_html=True)
-    st.markdown('<div style="color:#6a8f5a;font-size:13px;margin-bottom:16px;">All components from the AgroVision BOM · KSh 67,800 total</div>', unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-        <div>
-            <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#7bc452;">KSh 67,800</div>
-            <div style="font-size:11px;color:#6a8f5a;text-transform:uppercase;letter-spacing:.07em;margin-top:2px;">Total Hardware Budget</div>
-        </div>
-        <div style="text-align:right;">
-            <div style="font-family:'Syne',sans-serif;font-size:1.1rem;color:#5DCAA5;">15 Components</div>
-            <div style="margin-top:4px;"><span class="badge badge-green">ALL SYSTEMS ONLINE</span></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    for hw in HARDWARE:
-        st.markdown(f"""
-        <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;">
-            <span style="font-size:22px;flex-shrink:0;">{hw['icon']}</span>
-            <div style="flex:1;min-width:160px;">
-                <div style="font-weight:500;font-size:14px;">{hw['name']}</div>
-                <div style="font-size:11px;color:#6a8f5a;">{hw['port']}</div>
-            </div>
-            <div style="font-size:13px;color:#a8c898;flex:1;min-width:120px;">{hw['role']}</div>
-            <div style="font-size:13px;color:#7bc452;font-weight:500;min-width:90px;text-align:right;">{hw['cost']}</div>
-            <span class="badge badge-green">● ONLINE</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div style="font-family:\'Syne\',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:10px;">📟 Serial Monitor (Arduino)</div>', unsafe_allow_html=True)
-
-    now = datetime.datetime.now()
-    serial_lines = []
-    for i in range(8):
-        t = (now - datetime.timedelta(seconds=i * 5)).strftime("%H:%M:%S")
-        serial_lines.append(
-            f"[{t}] SOIL_MOIST:{sensors['soilMoisture'] + round(random.random()-0.5,1)}% | "
-            f"PH:{sensors['soilPh'] + round(random.random()*0.1-0.05,2):.2f} | "
-            f"TEMP:{sensors['temperature'] + round(random.random()*0.4-0.2,1)}C | "
-            f"HUM:{sensors['humidity'] + round(random.random()-0.5,1)}%"
-        )
-
-    st.code("\n".join(serial_lines), language="text")
-
-    st.markdown('<div style="font-family:\'Syne\',sans-serif;font-size:1rem;font-weight:700;margin:16px 0 10px;">🔧 Python Serial Integration</div>', unsafe_allow_html=True)
-    st.code("""# pip install pyserial
-import serial, time
-
-ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-
-def read_sensors():
-    line = ser.readline().decode('utf-8').strip()
-    data = dict(p.split(':') for p in line.split('|') if ':' in p)
-    return {k: float(v) for k, v in data.items()}
-
-while True:
-    print(read_sensors())
-    time.sleep(1)""", language="python")
-
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 def main():
     if not st.session_state.user:
@@ -940,7 +1113,7 @@ def main():
     render_sidebar(sensors, user)
 
     tab_labels = ["🏠 Overview", "🌱 Crop Health", "🔬 Pest & Disease",
-                  "📊 Yield", "💡 Recommendations", "🤖 AI Advisor", "🔌 Hardware"]
+                  "📊 Yield", "💡 Recommendations", "🤖 AI Advisor"]
     tabs = st.tabs(tab_labels)
 
     with tabs[0]: tab_overview(sensors, user)
@@ -949,7 +1122,6 @@ def main():
     with tabs[3]: tab_yield(sensors)
     with tabs[4]: tab_recommendations(sensors)
     with tabs[5]: tab_ai_advisor(sensors)
-    with tabs[6]: tab_hardware(sensors)
 
 
 main()
